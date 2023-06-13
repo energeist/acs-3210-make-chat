@@ -15,7 +15,7 @@ $(document).ready(()=>{
       currentUser = $('#username-input').val();
       $('.username-form').remove();
       $('.main-container').css('display', 'flex');
-    }
+    };
   });
 
   $('#send-chat-btn').click((e) => {
@@ -30,6 +30,16 @@ $(document).ready(()=>{
         message : message,
       });
       $('#chat-input').val("");
+    };
+  });
+
+  $('#new-channel-btn').click( () => {
+    let newChannel = $('#new-channel-input').val();
+  
+    if(newChannel.length > 0){
+      // Emit the new channel to the server
+      socket.emit('new channel', newChannel);
+      $('#new-channel-input').val("");
     }
   });
 
@@ -37,7 +47,7 @@ $(document).ready(()=>{
   socket.on('new user', (username) => {
     console.log(`${username} has joined the chat`);
     $('.users-online').append(`<div class="user-online">${username}</div>`);
-  })
+  });
 
   //Output the new message
   socket.on('new message', (data) => {
@@ -47,13 +57,13 @@ $(document).ready(()=>{
         <p class="message-text">${data.message}</p>
       </div>
     `);
-  })
+  });
 
   socket.on('get online users', (onlineUsers) => {
     for(username in onlineUsers){
       $('.users-online').append(`<div class="user-online">${username}</div>`);
-    }
-  })
+    };
+  });
 
   // Refres the online user list
   socket.on('user has left', (onlineUsers) => {
