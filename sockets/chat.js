@@ -4,13 +4,15 @@ module.exports = (io, socket, onlineUsers, channels) => {
     onlineUsers[username] = socket.id;
     //Save the username to socket as well. This is important for later.
     socket["username"] = username;
+    socket.join("General");
     console.log(`✋ ${username} has joined the chat! ✋`);
     io.emit("new user", username);
   });
 
   socket.on('new message', (data) => {
-    console.log(`🎤 ${data.sender}: ${data.message} 🎤`);
-    io.emit('new message', data);
+    console.log(`🎤 ${data.sender} @ ${data.channel}: ${data.message} 🎤`);
+    channels[data.channel].push({ sender: data.sender, message: data.message });
+    io.to(data.channel).emit('new message', data);
   });
 
   socket.on('get online users', () => {
