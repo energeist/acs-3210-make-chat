@@ -1,24 +1,26 @@
 const express = require('express');
 const app = express();
-//Socket.io has to use the http server
+// Socket.io has to use the http server
 const server = require('http').Server(app);
 
-//Socket.io
+// Socket.io
 const io = require('socket.io')(server);
-//We'll store our online users here
+// We'll store our online users here
 let onlineUsers = {};
+// And store channels here
+let channels = {"General": []};
 io.on("connection", (socket) => {
   // This file will be read on new socket connections
-  require('./sockets/chat.js')(io, socket, onlineUsers);
+  require('./sockets/chat.js')(io, socket, onlineUsers, channels);
   console.log("🔌 New user connected! 🔌");
 });
 
-//Express View Engine for Handlebars
+// Express View Engine for Handlebars
 const exphbs = require('express-handlebars');
 app.engine('handlebars', exphbs.engine({ defaultLayout: 'main' }));
 app.set('view engine', 'handlebars');
 
-//Establish your public folder
+// Establish your public folder
 app.use('/public', express.static('public'));
 
 app.get('/', (req, res) => {
