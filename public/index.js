@@ -5,6 +5,7 @@ $(document).ready(()=>{
 
   //Keep track of the current user
   let currentUser;
+  let channels;
 
   //Get the online users from the server and put them in General by default
   socket.emit('get online users');
@@ -53,13 +54,13 @@ $(document).ready(()=>{
     }
   });
 
-  //socket listeners
+  // socket listeners
   socket.on('new user', (username) => {
     console.log(`${username} has joined the chat`);
     $('.users-online').append(`<div class="user-online">${username}</div>`);
   });
 
-  //Output the new message
+  // Output the new message
   socket.on('new message', (data) => {
     // Only append the message if the user is currently in that channel
     let currentChannel = $('.channel-current').text();
@@ -79,7 +80,7 @@ $(document).ready(()=>{
     };
   });
 
-  // Refres the online user list
+  // Refresh the online user list
   socket.on('user has left', (onlineUsers) => {
     $('.users-online').empty();
     for(username in onlineUsers){
@@ -87,9 +88,37 @@ $(document).ready(()=>{
     }
   })
 
+  // Refresh the channel list and messages
+  socket.on('get all channels', (channels) => {
+    // Clear the existing channels
+    $('.existing-channels').empty();
+  
+    // Iterate over each channel and its messages
+    for (channel in channels) {
+      // Append the channel to the channels list
+      $('.existing-channels').append(`<div class="channel">${channel}</div>`);
+  
+      // Check if the channel is the current channel
+      if ($('.channel-current').text() === channel) {
+        // Clear the existing messages
+        $('.message').remove();
+  
+        // Iterate over the messages and append them to the message container
+        channels[channel].forEach((message) => {
+          $('.message-container').append(`
+            <div class="message">
+              <p class="message-user">${message.sender}: </p>
+              <p class="message-text">${message.message}</p>
+            </div>
+          `);
+        });
+      }
+    }
+  });
+
   // Add the new channel to the channels list for all clients
   socket.on('new channel', (newChannel) => {
-    $('.channels').append(`<div class="channel">${newChannel}</div>`);
+    $('.existing-channels').append(`<div class="channel">${newChannel}</div>`);
   })
 
   // Make the channel joined the current channel, then load the messages
